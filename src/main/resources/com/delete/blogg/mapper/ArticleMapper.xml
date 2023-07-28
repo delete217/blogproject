@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.delete.blogg.mapper.ArticleMapper">
+
+<!--    <resultMap id="articleMap" type="com.delete.blogg.entity.Article">-->
+<!--        <id column="id" property="id"/>-->
+<!--        <result column="author_id" property="authorId"/>-->
+<!--        <result column="comment_counts" property="commentCounts"/>-->
+<!--        <result column="create_date" property="createDate"/>-->
+<!--        <result column="summary" property="summary"/>-->
+<!--        <result column="title" property="title"/>-->
+<!--        <result column="view_counts" property="viewCounts"/>-->
+<!--        <result column="weight" property="weight"/>-->
+<!--        <result column="body_id" property="bodyId"/>-->
+<!--        <result column="category_id" property="categoryId"/>-->
+<!--    </resultMap>-->
+
+    <select id="findHotArticle" parameterType="int" resultType="com.delete.blogg.entity.Article">
+        SELECT *
+        FROM `ms_article`
+        ORDER BY view_counts DESC
+        limit #{limit}
+    </select>
+
+    <select id="finNewArticle" parameterType="int" resultType="com.delete.blogg.entity.Article">
+        SELECT *
+        FROM `ms_article`
+        ORDER BY create_date DESC
+        limit #{limit}
+    </select>
+
+    <select id="archive" resultType="com.delete.blogg.vo.ArchiveVo">
+        SELECT YEAR(from_unixtime(create_date / 1000))  as year,
+               MONTH(from_unixtime(create_date / 1000)) as month,
+               count(*)                                 as count
+        from ms_article
+        GROUP BY year, month DESC
+    </select>
+
+    <!--  无效  -->
+<!--    <select id="listArticle" resultMap="articleMap">-->
+<!--        select * from ms_article-->
+<!--        <where>-->
+<!--            1 = 1-->
+<!--            <if test="categoryId != 0">-->
+<!--                and category_id = #{categoryId}-->
+<!--            </if>-->
+<!--            <if test="tagId != 0">-->
+<!--                and id in (select article_id from ma_article where tag_id = #{tagId})-->
+<!--            </if>-->
+<!--            <if test="year != null and year.length>0 and month != null and month.length>0">-->
+<!--                and((from_unixtime(create_date / 1000,"%Y")) = #{year},-->
+<!--                (from_unixtime(create_date / 1000,"%m")) = #{month},)-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        order by weight,create_date desc-->
+<!--    </select>-->
+
+    <select id="findArticleByDate" parameterType="int" resultType="com.delete.blogg.entity.Article">
+        SELECT * from `ms_article`
+        where YEAR(from_unixtime(create_date / 1000)) = #{param1} and
+            MONTH(from_unixtime(create_date / 1000)) = #{param2}
+    </select>
+    <select id="searchArticleByTitle" resultType="com.delete.blogg.entity.Article">
+        SELECT * FROM `ms_article`
+        <where>
+            <if test="title != null">
+                title like "%"#{title}"%"
+            </if>
+        </where>
+        ORDER BY create_date DESC
+    </select>
+
+</mapper>
